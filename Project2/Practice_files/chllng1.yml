@@ -1,0 +1,39 @@
+Description: Isaac Frimpong / Udacity - This template deploys an SG and EC2
+Resources:
+    UdacityChllng1SG:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow http to client host
+            VpcId: vpc-093334bd355b42415
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  CidrIp: 0.0.0.0/0
+            SecurityGroupEgress:
+                - IpProtocol: -1
+                  FromPort: -1
+                  ToPort: -1
+                  CidrIp: 0.0.0.0/0
+
+    UdacityInstance:
+        Type: AWS::EC2::Instance
+        Properties:
+            InstanceType: t3.micro
+            ImageId: ami-0022f774911c1d690
+            NetworkInterfaces:
+                - AssociatePublicIpAddress: "true"
+                  DeviceIndex: "0"
+                  GroupSet:
+                      - Ref: "UdacityChllng1SG"
+                  SubnetId: subnet-0903d02760938db00
+            Tags:
+                - Key: Name
+                  Value: UdaWebserver
+            UserData:
+                Fn::Base64: !Sub |
+                    #!/bin/bash
+                    yum update -y
+                    yum install -y httpd
+                    systemctl start httpd
+                    systemctl enable httpd
